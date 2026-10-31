@@ -33,11 +33,9 @@ Du kannst immer den kompletten Export erneut hochladen: bereits bekannte Einträ
 
 ## Installation (GitHub-Repository)
 
-1. Dieses Repository auf GitHub veröffentlichen und in `repository.yaml` sowie
-   `sugarwod_coach/config.yaml` die URL (`OWNER`) anpassen.
-2. In Home Assistant: **Einstellungen → Add-ons → Add-on Store → ⋮ → Repositories**, die
-   GitHub-URL eintragen.
-3. **SugarWOD Coach** installieren, starten und „In Seitenleiste anzeigen“ aktivieren.
+1. In Home Assistant: **Einstellungen → Add-ons → Add-on Store → ⋮ → Repositories** und
+   `https://github.com/Tom433/sugarwod-ha-addon` eintragen.
+2. **SugarWOD Coach** installieren, starten und „In Seitenleiste anzeigen“ aktivieren.
 
 Home Assistant baut das Image beim Installieren selbst (amd64 und aarch64). Das dauert beim ersten
 Mal ein paar Minuten.

@@ -2,7 +2,7 @@ name: SugarWOD Coach
 version: "0.1.0"
 slug: sugarwod_coach
 description: Wertet SugarWOD-Workouts aus – Gewichtsvorschläge, Verlauf, Stärken und Schwächen
-url: https://github.com/OWNER/sugarwod-ha-addon
+url: https://github.com/Tom433/sugarwod-ha-addon
 arch:
   - aarch64
   - amd64
