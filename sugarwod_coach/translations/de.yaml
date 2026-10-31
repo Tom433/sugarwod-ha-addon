@@ -1,0 +1,24 @@
+configuration:
+  export_unit:
+    name: Einheit im SugarWOD-Export
+    description: SugarWOD exportiert Gewichte meist in lbs, auch wenn die Box in kg protokolliert.
+  display_unit:
+    name: Anzeigeeinheit
+    description: Einheit für Oberfläche und Sensoren.
+  plate_increment:
+    name: Kleinster Gewichtssprung
+    description: Vorschläge werden darauf gerundet (z. B. 2,5 kg = zwei 1,25-kg-Scheiben).
+  formula:
+    name: 1RM-Formel
+    description: Epley, Brzycki oder der Mittelwert aus beiden.
+  body_weight_kg:
+    name: Körpergewicht (kg)
+    description: Optional, für relative Kraftwerte. 0 = nicht verwenden.
+  ha_sensors:
+    name: Sensoren an Home Assistant melden
+  sensor_lifts:
+    name: Übungen als Sensor
+    description: Für jede Übung entsteht ein Sensor mit dem geschätzten 1RM.
+  watch_folder:
+    name: Import-Ordner
+    description: CSV-Dateien, die hier abgelegt werden, werden automatisch importiert.

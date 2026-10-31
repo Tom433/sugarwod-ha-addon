@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SugarWOD Coach</title>
+<link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+<header>
+  <h1>SugarWOD Coach</h1>
+  <nav id="tabs">
+    <button data-tab="uebersicht" class="active">Übersicht</button>
+    <button data-tab="vorschlag">Gewichtsvorschlag</button>
+    <button data-tab="verlauf">Verlauf</button>
+    <button data-tab="analyse">Stärken &amp; Schwächen</button>
+    <button data-tab="import">Import</button>
+  </nav>
+</header>
+
+<main>
+  <div id="empty" class="card notice hidden">
+    <h2>Noch keine Daten</h2>
+    <p>Exportiere deine Workouts in der SugarWOD-App (<b>More → Tools &amp; Resources → Export Workouts</b>).
+      Die CSV kommt per Mail – lade sie unter <a href="#" data-goto="import">Import</a> hoch.</p>
+  </div>
+
+  <!-- Übersicht -->
+  <section id="uebersicht" class="tab active">
+    <div class="stats" id="stats"></div>
+    <div class="grid2">
+      <div class="card">
+        <h2>Woran du arbeiten solltest</h2>
+        <ol id="recs-short" class="recs"></ol>
+      </div>
+      <div class="card">
+        <h2>Letzte Workouts</h2>
+        <table class="list" id="recent"></table>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Geschätztes 1RM pro Übung</h2>
+      <table class="list" id="lift-table"></table>
+      <p class="muted small">Geschätzt aus deinen besten Sätzen der letzten 180 Tagen. Ausgegraut: älter als 180 Tage.</p>
+    </div>
+  </section>
+
+  <!-- Vorschlag -->
+  <section id="vorschlag" class="tab">
+    <div class="grid2">
+      <form class="card" id="suggest-form">
+        <h2>Was steht an?</h2>
+        <label>Übung <select name="lift" id="s-lift"></select></label>
+        <label>Art
+          <select name="mode" id="s-mode">
+            <option value="kraft">Kraftteil (Sätze × Wiederholungen)</option>
+            <option value="prozent">Prozentvorgabe (z. B. 5 × 3 @ 80 %)</option>
+            <option value="metcon">Metcon / WOD</option>
+          </select>
+        </label>
+        <div class="row">
+          <label>Sätze / Runden <input type="number" name="sets" value="5" min="1" max="50"></label>
+          <label>Wdh. pro Satz <input type="number" name="reps" value="5" min="1" max="100"></label>
+        </div>
+        <label id="s-int-wrap">Intensität
+          <select name="intensity">
+            <option value="technik">Technik / leicht</option>
+            <option value="moderat" selected>Moderat (RPE 8)</option>
+            <option value="schwer">Schwer (RPE 9)</option>
+            <option value="maximal">Maximal (RPE 10)</option>
+          </select>
+        </label>
+        <label id="s-pct-wrap" class="hidden">Prozent vom 1RM <input type="number" name="percent" value="80" min="10" max="110" step="1"></label>
+        <button type="submit" class="primary">Gewicht berechnen</button>
+      </form>
+      <div class="card" id="suggest-result">
+        <p class="muted">Wähle Übung und Vorgabe – der Vorschlag erscheint hier.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Verlauf -->
+  <section id="verlauf" class="tab">
+    <div class="card">
+      <div class="row between">
+        <h2>Verlauf</h2>
+        <select id="h-lift"></select>
+      </div>
+      <div class="stats" id="h-stats"></div>
+      <div class="chart-wrap"><canvas id="h-chart"></canvas></div>
+      <p class="muted small">Punkte: schwerster Satz des Tages. Linie: geschätztes 1RM. ★ = neuer Bestwert (geschätztes 1RM).</p>
+    </div>
+    <div class="card">
+      <h2>Alle Einheiten</h2>
+      <table class="list" id="h-table"></table>
+    </div>
+  </section>
+
+  <!-- Analyse -->
+  <section id="analyse" class="tab">
+    <div class="card">
+      <h2>Empfehlungen</h2>
+      <ol id="recs" class="recs"></ol>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>Stärken</h2>
+        <ul id="strengths" class="plain"></ul>
+      </div>
+      <div class="card">
+        <h2>Trainingsbalance (90 Tage)</h2>
+        <div class="chart-wrap small"><canvas id="balance-chart"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Kraftverhältnisse</h2>
+      <p class="muted small">Vergleich deiner geschätzten 1RMs mit üblichen Richtwerten im Gewichtheben/CrossFit. Der grüne Bereich ist der Zielkorridor.</p>
+      <div id="ratios"></div>
+    </div>
+    <div class="card" id="relative-card">
+      <h2>Relative Kraft</h2>
+      <div id="relative"></div>
+    </div>
+    <div class="card">
+      <h2>Trends der Übungen</h2>
+      <p class="muted small">Bestes geschätztes 1RM der letzten 90 Tage gegenüber den 90 Tagen davor.</p>
+      <table class="list" id="trends"></table>
+    </div>
+    <div class="card">
+      <h2>Wiederholte Workouts &amp; Benchmarks</h2>
+      <table class="list" id="benchmarks"></table>
+    </div>
+  </section>
+
+  <!-- Import -->
+  <section id="import" class="tab">
+    <div class="grid2">
+      <form class="card" id="import-form">
+        <h2>SugarWOD-Export hochladen</h2>
+        <ol class="steps">
+          <li>SugarWOD-App öffnen → <b>More</b> → <b>Tools &amp; Resources</b> → <b>Export Workouts</b>.</li>
+          <li>Die CSV kommt per Mail. Anhang speichern.</li>
+          <li>Hier hochladen. Doppelte Einträge werden automatisch übersprungen.</li>
+        </ol>
+        <input type="file" name="file" accept=".csv,text/csv" multiple required>
+        <button type="submit" class="primary">Importieren</button>
+        <p id="import-msg"></p>
+        <p class="muted small" id="watch-info"></p>
+      </form>
+      <div class="card">
+        <h2>Einstellungen &amp; Status</h2>
+        <dl id="settings"></dl>
+        <p class="muted small">Ändern unter Einstellungen → Add-ons → SugarWOD Coach → Konfiguration.</p>
+        <h3>Letzte Importe</h3>
+        <table class="list" id="imports"></table>
+        <div class="row">
+          <button type="button" id="push-sensors">Sensoren jetzt senden</button>
+          <button type="button" id="wipe" class="danger">Alle Daten löschen</button>
+        </div>
+        <p id="settings-msg"></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="static/chart.umd.min.js"></script>
+<script src="static/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script src="static/app.js"></script>
+</body>
+</html>

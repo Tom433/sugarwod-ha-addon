@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "sugarwod-coach",
+      "runtimeExecutable": "/bin/sh",
+      "runtimeArgs": ["-c", "cd sugarwod_coach/app && DATA_DIR=../../.localdata PORT=8099 ../../.venv/bin/python -m server"],
+      "port": 8099
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+configuration:
+  export_unit:
+    name: Unit in SugarWOD export
+  display_unit:
+    name: Display unit
+  plate_increment:
+    name: Smallest weight increment
+  formula:
+    name: 1RM formula
+  body_weight_kg:
+    name: Body weight (kg)
+  ha_sensors:
+    name: Report sensors to Home Assistant
+  sensor_lifts:
+    name: Lifts reported as sensors
+  watch_folder:
+    name: Import folder
