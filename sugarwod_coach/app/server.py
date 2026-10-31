@@ -6,7 +6,7 @@ import threading
 import time
 from datetime import datetime
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, abort, jsonify, request, send_from_directory
 from waitress import serve
 
 import analysis
@@ -20,7 +20,33 @@ log = logging.getLogger("sugarwod")
 
 STATIC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 app = Flask(__name__, static_folder=None)
-app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
+# SugarWOD-Exporte sind wenige hundert KB – 5 MB reichen auch für viele Jahre Training.
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
+
+# Home Assistant leitet Ingress-Anfragen immer von dieser Adresse weiter. Alles andere
+# (z. B. andere Add-ons im Supervisor-Netz) käme ohne HA-Anmeldung an die API.
+INGRESS_GATEWAY = "172.30.32.2"
+# Im Add-on gesetzt; lokal (Entwicklung/Tests) gibt es keinen Ingress und damit keine Sperre.
+RESTRICT_TO_INGRESS = bool(os.environ.get("SUPERVISOR_TOKEN"))
+
+
+@app.before_request
+def only_ingress():
+    if RESTRICT_TO_INGRESS and request.remote_addr != INGRESS_GATEWAY:
+        log.warning("Zugriff von %s abgelehnt (nicht über Ingress)", request.remote_addr)
+        abort(403)
+
+
+@app.after_request
+def security_headers(resp):
+    resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+    resp.headers.setdefault("Referrer-Policy", "no-referrer")
+    resp.headers.setdefault(
+        "Content-Security-Policy",
+        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'",
+    )
+    return resp
 
 KG_KEYS = {"current_kg", "all_time_kg", "top_kg", "e1rm_kg", "one_rm_kg", "weight_kg", "low_kg", "high_kg", "kg"}
 
@@ -124,7 +150,12 @@ def full_analysis():
 
 @app.get("/api/workouts")
 def workouts():
-    limit = min(int(request.args.get("limit", 30)), 500)
+    try:
+        limit = int(request.args.get("limit", 30))
+    except ValueError:
+        return jsonify({"ok": False, "fehler": "Ungültiges Limit."}), 400
+    # In SQLite heißt LIMIT -1 "unbegrenzt" – daher nach unten begrenzen.
+    limit = max(1, min(limit, 500))
     rows = db.query("""SELECT w.date, w.title, w.score_type, w.lift, w.best_display, w.rx, w.pr, w.categories,
                               (SELECT MAX(load_kg) FROM sets s WHERE s.workout_id = w.id AND s.success = 1) AS top_kg
                        FROM workouts w ORDER BY w.date DESC, w.id DESC LIMIT ?""", (limit,))
@@ -152,7 +183,8 @@ def watch_folder_loop():
             if os.path.isdir(folder):
                 for name in sorted(os.listdir(folder)):
                     path = os.path.join(folder, name)
-                    if not name.lower().endswith(".csv") or not os.path.isfile(path):
+                    # Symlinks überspringen: sonst ließe sich über /share eine beliebige Datei einlesen.
+                    if not name.lower().endswith(".csv") or os.path.islink(path) or not os.path.isfile(path):
                         continue
                     target = done_dir
                     try:

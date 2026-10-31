@@ -183,7 +183,8 @@ async function loadHistory() {
               ? `1RM ≈ ${w(p.e1rm_kg)} (aus ${p.e1rm_set}${p.assumed ? ", Wdh. angenommen" : ""})${p.pr_e1rm ? " ★ PR" : ""}`
               : `Schwerster Satz: ${w(p.top_kg)} × ${p.top_reps}`;
           },
-          afterBody: (items) => esc(pts[items[0].dataIndex].title),
+          // Chart.js zeichnet Tooltips als Text auf das Canvas – kein HTML, also nicht escapen.
+          afterBody: (items) => pts[items[0].dataIndex].title,
         } },
       },
     },
